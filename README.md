@@ -1,118 +1,73 @@
-# Objetivo/Requerimiento
+## Resumen del proyecto — Analítica de Pádel 2026-1 (18 de mayo)
 
-Crear el mejor modelo posible para predecir el equipo ganador de un partido tras cada punto marcado por alguno de los dos equipos durante el partido
+### Objetivo
 
-> ./databases
-> Los archivos csv (Base_Videos_Final_202502 y Base_Videos_Final_202601)se exluyeron del repositorio en main por su tamaño
+Construir un modelo que prediga el equipo ganador de un partido de pádel tras cada punto jugado, usando datos de tracking de video (computer vision) y registros manuales de partidos.
 
-# Resumen de Progreso — Proyecto Analítica de Datos Pádel (2026-1)
+### Contexto del deporte
 
-## Objetivo del proyecto
-
-Predecir la probabilidad de ganar un partido de pádel tras cada punto anotado, usando datos de tracking de video (computer vision) y registros manuales de partidos jugados por estudiantes universitarios.
+Los partidos son jugados por estudiantes universitarios en formato de puntos directos: gana el primer equipo en llegar a 7 puntos con al menos 2 de diferencia. Cada partido enfrenta dos equipos de dos jugadores.
 
 ---
 
-## Bases de datos
+### Fuentes de datos
 
-Se trabaja con tres fuentes independientes para el periodo 2026-1:
+Se trabaja con tres bases independientes del periodo 2026-1:
 
-- **`data_videos`** (`Base_Videos_Final_202601.csv`): datos frame a frame extraídos por computer vision. Cada fila es un frame de un punto de un partido, con 30 variables de posición y movimiento de jugadores y pelota. Shape final: **(431,122 × 30)**.
-- **`data_partidos`** (`Traza_Datos_Partidos_202601.xlsx`): registro punto a punto de cada partido. Tiene dos hojas (CANCHA_1 y CANCHA_2), ambas cargadas y concatenadas.
-- **`data_jugadores`** (`Data_Jugadores_202601.xlsx`): perfil de cada jugador con variables demográficas, deportivas y de rendimiento (`Win_Rate`, `Puntos_Ganados`, `Puntos_Jugados`).
-
----
-
-## Lo que se ha hecho
-
-### 1. Limpieza de `data_videos`
-
-**Valores nulos:**
-
-- Frame 0 de cada punto eliminado (nulos estructurales en variables de movimiento).
-- Frames residuales con `prev_speed` y `player_acceleration_mps2` nulos eliminados.
-- `time_since_last_hit` imputado con `-1` (indica que aún no ha ocurrido ningún golpe en el punto).
-- `team` imputado con moda por punto → partido → jugador.
-- `distance_player_to_teammate_m` recalculada con distancia euclidiana usando `transform`.
-- Variables de pelota (`ball_position_x_prev`, etc.) recalculadas con `shift`; nulos irrecuperables eliminados (< 0.2%).
-- `team` normalizado a mayúsculas.
-
-**Outliers:**
-
-- Método de límites físicos con clipeo (no eliminación), dado que IQR colapsaba por concentración de ceros.
-
-```python
-limites_fisicos = {
-    'player_speed_mps':              (0, 7),
-    'player_acceleration_mps2':      (-10, 10),
-    'ball_speed_mps':                (0, 50),
-    'distance_player_to_ball_m':     (0, 20),
-    'distance_player_to_net_m':      (0, 10),
-    'distance_player_to_teammate_m': (0, 10),
-    'player_displacement':           (0, 2),
-}
-```
-
-### 2. Limpieza de `data_partidos`
-
-- Nombres de jugadores normalizados a título (mayúscula inicial) en las columnas de jugadores.
-- Construcción del marcador acumulado por partido (`MARCADOR_EQUIPO_1`, `MARCADOR_EQUIPO_2`).
-- Nota: el partido ID 23 terminó 7-6 (diferencia de 1) — tratado como error de registro.
-
-### 3. Normalización de nombres entre bases
-
-Se detectó que los nombres de jugadores tenían inconsistencias de capitalización y tildes entre `data_videos` y `data_partidos`. Se aplicó una función de normalización en ambas bases:
-
-- Conversión a minúsculas → título
-- Eliminación de tildes con `unicodedata`
-- Strip de espacios
-
-### 4. Verificación y corrección de posiciones TOP/BOTTOM
-
-Se construyó un procedimiento de validación cruzando la columna `team` de `data_videos` contra las columnas `EQUIPO_1_POSICION` / `EQUIPO_2_POSICION` de `data_partidos`, por partido y punto.
-
-**Hallazgos:**
-
-- 209 casos de jugadores que aparecían asignados a ambos equipos en el mismo punto (ruido del tracking).
-- Varios partidos con inversión sistemática de TOP/BOTTOM en `data_videos`.
-- Partidos con jugadores no registrados en `data_partidos` (Player_X sin nombre real).
-
-**Solución aplicada:**
-Se usó `data_partidos` como fuente de verdad. Se construyó un lookup `partido → jugador → team_correcto` y se reasignó `team` en `data_videos` para todos los jugadores con nombre identificado:
-
-- **96.7% de frames corregidos** (416,907 frames)
-- **3.3% sin match** (14,215 frames correspondientes a Player_X)
-
-### 5. Agregación de `data_videos` a nivel de punto
-
-Se construyó `data_videos_agg` agrupando por `partido` y `punto`, calculando estadísticas separadas por equipo (BOTTOM = equipo 1 según `data_partidos`, TOP = equipo 2). Shape: **(287 × 19)**.
-
-Variables agregadas:
-
-- `duracion_punto`
-- `velocidad_prom_e1/e2`, `velocidad_max_e1/e2`
-- `desplazamiento_total_e1/e2`
-- `dist_red_prom_e1/e2`
-- `dist_companero_prom_e1/e2`
-- `hits_e1/e2`
-- `velocidad_prom_pelota`, `velocidad_max_pelota`
-- `aceleracion_prom_e1/e2`
-
-### 6. Join entre `data_videos_agg` y `data_partidos`
-
-Se realizó un join `inner` por `partido` y `punto`, generando el dataframe consolidado **`data`**.
+| Base             | Descripción                                                                                            | Shape original |
+| ---------------- | ------------------------------------------------------------------------------------------------------ | -------------- |
+| `data_videos`    | Datos frame a frame (60fps) extraídos por computer vision. Posición y movimiento de jugadores y pelota | 434,198 × 30   |
+| `data_partidos`  | Registro punto a punto de cada partido (2 canchas)                                                     | 406 × 15       |
+| `data_jugadores` | Perfil demográfico y deportivo de cada jugador                                                         | 31 × 30        |
 
 ---
 
-## Pendientes
+### Lo que se ha hecho
 
-1. **Construir la variable objetivo** (`EQUIPO_GANADOR`: 1 si gana equipo 1, 2 si gana equipo 2) y las variables de contexto por punto:
-   - `DIFERENCIA_MARCADOR`
-   - `PUNTOS_JUGADOS`
-   - `WINRATE_ACUM_E1`, `WINRATE_ACUM_E2`
-   - `RACHA_EQUIPO_1`, `RACHA_EQUIPO_2`
-   - `PUNTOS_ULTIMOS_5_E1`, `PUNTOS_ULTIMOS_5_E2`
+**1. Limpieza de `data_videos`**
 
-2. **Integrar `data_jugadores`** — enriquecer `data` con el perfil de cada jugador (experiencia, nivel, condición física, etc.).
+- Eliminación de primeros frames de cada punto (nulos estructurales en variables de movimiento).
+- Imputación de `time_since_last_hit` con −1 (indica que aún no se ha golpeado la pelota en el punto).
+- Imputación de `team` por moda a nivel partido y jugador, usando `data_partidos` como fuente de verdad. El 95.7% de los frames quedaron correctamente asignados.
+- Jugadores no identificados (`Player_X`) corregidos por descarte cuando era posible (4,499 corregidos); los 9,716 irrecuperables fueron eliminados.
+- Imputación de `zone` por moda de partido y jugador; valores `left_box`/`right_box` normalizados a `left`/`right`.
+- `distance_player_to_teammate_m` recalculada con distancia euclidiana cuando faltaba.
+- Variables de pelota (`ball_position_x_prev`, etc.) recalculadas con `shift`; nulos residuales eliminados.
+- Outliers tratados con clipeo por límites físicos (no eliminación), dado que IQR colapsaba por concentración de ceros.
+- Shape final: **421,406 × 30**
 
-3. **Análisis exploratorio (EDA)** sobre `data` consolidado — distribuciones, correlaciones, comportamiento de variables por equipo ganador.
+**2. Limpieza de `data_partidos`**
+
+- Nombres de jugadores normalizados (título, sin tildes, sin espacios extra).
+- Construcción del marcador acumulado punto a punto.
+- Corrección del partido 8: `ID_PUNTO` estaba siempre en 1 por error de registro; se reasignó la secuencia real usando el marcador acumulado.
+
+**3. Variables de contexto construidas desde `data_partidos`**
+
+| Variable                 | Descripción                                            |
+| ------------------------ | ------------------------------------------------------ |
+| `MARCADOR_EQUIPO_1/2`    | Puntos acumulados por cada equipo al momento del punto |
+| `EQUIPO_GANADOR`         | Variable objetivo: equipo que ganó el partido (1 o 2)  |
+| `DIFERENCIA_MARCADOR`    | Diferencia de marcador entre equipos (E1 − E2)         |
+| `PUNTOS_JUGADOS`         | Total de puntos disputados hasta ese momento           |
+| `WINRATE_ACUM_E1/E2`     | Proporción de puntos ganados acumulada (0–1)           |
+| `RACHA_EQUIPO_1/2`       | Puntos consecutivos ganados en ese momento             |
+| `PUNTOS_ULTIMOS_5_E1/E2` | Puntos ganados en los últimos 5 puntos                 |
+
+**4. Agregación de `data_videos` a nivel de punto**
+
+Se colapsaron los 421,406 frames a una fila por punto, calculando estadísticas separadas por equipo (BOTTOM = equipo 1, TOP = equipo 2): velocidad promedio y máxima, desplazamiento total, distancia a la red, distancia al compañero, golpes, velocidad promedio y máxima de pelota, aceleración promedio. Shape: **287 × 19**
+
+**5. Join `data_videos_agg` + `data_partidos`**
+
+Join inner por partido y punto. 20 puntos sin match fueron analizados y descartados justificadamente (ruido de tracking, registros incompletos). Shape final: **283 × 35**
+
+**6. Limpieza de `data_jugadores`**
+
+Se eliminaron variables irrelevantes para el modelo (ciudad, programa académico, género musical, etc.) y se aplicó encoding ordinal a variables de experiencia y condición física. `Win_Rate`, `Puntos_Ganados` y `Puntos_Jugados` se eliminaron — se calcularán desde `data_partidos` que es más confiable. Shape final: **31 × 13**
+
+---
+
+### Estado actual
+
+El dataframe `data` (283 × 35) está listo con todas las variables de tracking y contexto de partido. El siguiente paso es hacer el join con `data_jugadores` para enriquecer cada punto con el perfil de los cuatro jugadores participantes, y posteriormente realizar el EDA y el modelado predictivo.
