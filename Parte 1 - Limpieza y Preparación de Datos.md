@@ -6,7 +6,7 @@
 
 ## ¿De qué trata este notebook?
 
-Este notebook toma tres bases de datos crudas sobre partidos de pádel recreativo jugados por estudiantes universitarios y las transforma en un dataset limpio y listo para modelar. El objetivo final es predecir si un equipo va a ganar el punto que está por jugarse.
+Este notebook toma tres bases de datos crudas sobre partidos de pádel recreativo jugados por estudiantes universitarios y las transforma en un dataset limpio y listo para modelar. El objetivo final es predecir si un equipo va a ganar el partido a partir del punto actual y estadisticas generales de los anteriores puntos jugados en este partido.
 
 Los datos vienen de tres fuentes:
 
