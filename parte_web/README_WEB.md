@@ -1,31 +1,68 @@
-# Parte Web — Pádel Winrate Live
+# Parte Web — modo recomendado: clips por punto
 
-Esta parte agrega una interfaz web para cargar un video del partido y visualizar el winrate en tiempo real por puntos.
+Esta version de la web esta pensada para trabajar con un video corto por cada punto.
+Es la opcion recomendada cuando cada partido tiene pocos puntos registrados en el dataset.
 
-## Flujo
+## Flujo correcto
 
-1. Ejecutar la Parte 4 corregida para crear `modelo_final.pkl`.
-2. Ejecutar la Parte 5 corregida para crear `frontend_data.json`.
-3. Levantar la web con FastAPI.
-4. Cargar un video desde el navegador.
-5. Seleccionar el partido.
-6. El dashboard actualiza marcador, probabilidad y favorito según el tiempo del video.
-
-## Comandos
+Desde la raiz del proyecto:
 
 ```bash
-pip install fastapi uvicorn python-multipart pandas numpy scikit-learn xgboost joblib
-python parte_4_xgboost_final_corregido.py
-python parte_5_frontend_api_corregido.py
-uvicorn parte_web.api:app --reload
+python parte_5_frontend_api.py
+python -m uvicorn parte_web.api:app --reload
 ```
 
-Abrir:
+Luego abrir:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-## Nota importante sobre “en vivo”
+## Como nombrar los clips
 
-Este módulo actualiza el winrate después de cada punto. Para análisis 100% automático desde video crudo se necesitaría una etapa adicional de computer vision que detecte fin de punto, marcador y ganador del punto desde la imagen. En este proyecto, la sincronización se hace con las columnas `timestamp`, `frame` o con la duración acumulada de los puntos.
+Para que el sistema los asocie automaticamente con cada punto, usa nombres como:
+
+```text
+partido_6_punto_1.mp4
+partido_6_punto_2.mp4
+partido_6_punto_3.mp4
+```
+
+Tambien acepta nombres como:
+
+```text
+punto_1.mp4
+p1.mp4
+p6_p1.mp4
+clip_1.mp4
+```
+
+Lo mas seguro es usar:
+
+```text
+partido_ID_punto_NUMERO.mp4
+```
+
+Ejemplo para el partido 6:
+
+```text
+partido_6_punto_1.mp4
+partido_6_punto_2.mp4
+partido_6_punto_3.mp4
+partido_6_punto_4.mp4
+partido_6_punto_5.mp4
+partido_6_punto_6.mp4
+partido_6_punto_7.mp4
+```
+
+## Como funciona
+
+- El JSON trae el marcador, probabilidades y variables de tracking por punto.
+- La web no intenta sincronizar un video largo.
+- Al seleccionar un punto, carga el clip correspondiente.
+- Al terminar un clip, puede avanzar automaticamente al siguiente punto.
+- El winrate se actualiza punto a punto.
+
+## Importante
+
+La probabilidad mostrada no es la probabilidad de ganar el siguiente punto. Es la probabilidad de ganar el partido despues de observar el estado del partido en ese punto.

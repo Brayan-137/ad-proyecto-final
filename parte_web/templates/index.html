@@ -3,82 +3,107 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pádel Winrate Live</title>
+  <title>Pádel Winrate por Punto</title>
   <style>
-    :root { --bg:#0b1220; --card:#121a2b; --text:#edf2ff; --muted:#9aa7bd; --e1:#4da3ff; --e2:#ff8b5e; --ok:#34d399; }
-    * { box-sizing:border-box; }
-    body { margin:0; font-family:Inter, system-ui, Arial, sans-serif; background:var(--bg); color:var(--text); }
-    header { padding:22px 28px; border-bottom:1px solid rgba(255,255,255,.08); display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
-    h1 { margin:0; font-size:24px; }
-    .sub { color:var(--muted); font-size:14px; margin-top:4px; }
-    main { display:grid; grid-template-columns: 1.2fr .8fr; gap:18px; padding:18px; }
-    .card { background:var(--card); border:1px solid rgba(255,255,255,.08); border-radius:18px; padding:16px; box-shadow:0 18px 55px rgba(0,0,0,.22); }
-    video { width:100%; border-radius:14px; background:#000; max-height:62vh; }
-    select, input, button { border:0; border-radius:10px; padding:10px 12px; background:#1c2740; color:var(--text); }
-    button { cursor:pointer; background:#2f6fed; font-weight:700; }
-    .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
-    .score { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:10px; margin:10px 0 18px; }
-    .team { padding:14px; border-radius:14px; background:#0f1728; }
-    .team h2 { margin:0 0 6px; font-size:16px; color:var(--muted); }
-    .team .num { font-size:34px; font-weight:900; }
-    .vs { color:var(--muted); font-weight:800; }
-    .bar { height:22px; border-radius:999px; overflow:hidden; display:flex; background:#0b1020; border:1px solid rgba(255,255,255,.08); }
-    .bar div { height:100%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:800; white-space:nowrap; }
-    #barE1 { background:var(--e1); }
-    #barE2 { background:var(--e2); }
-    .metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:14px; }
-    .metric { background:#0f1728; border-radius:14px; padding:12px; }
-    .metric span { color:var(--muted); font-size:12px; display:block; }
-    .metric strong { font-size:20px; }
-    .context { line-height:1.45; color:#d6def1; margin:12px 0; }
-    .timeline { max-height:260px; overflow:auto; display:grid; gap:8px; margin-top:10px; }
-    .point { display:flex; justify-content:space-between; gap:10px; padding:10px; border-radius:12px; background:#0f1728; color:var(--muted); font-size:13px; }
-    .point.active { outline:2px solid var(--ok); color:var(--text); }
-    @media(max-width:980px){ main{grid-template-columns:1fr;} }
+    :root{
+      --bg:#07111f; --panel:#101a2e; --panel2:#0c1425; --line:rgba(255,255,255,.10);
+      --text:#edf4ff; --muted:#9db0ca; --e1:#38bdf8; --e2:#fb923c; --ok:#34d399; --bad:#fb7185;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at top,#102448 0,#07111f 42%,#050914 100%);color:var(--text)}
+    header{padding:20px 26px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap;background:rgba(5,9,20,.78);backdrop-filter:blur(12px)}
+    h1{margin:0;font-size:24px}.sub{color:var(--muted);font-size:13px;margin-top:4px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    select,input,button{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#15213a;color:var(--text)}
+    button{cursor:pointer;background:#2563eb;font-weight:800}.btn2{background:#1f2d49}.btn-ok{background:#059669}.btn-warn{background:#b45309}
+    main{display:grid;grid-template-columns:1.15fr .85fr;gap:18px;padding:18px}.card{background:rgba(16,26,46,.96);border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:0 22px 60px rgba(0,0,0,.30)}
+    video{width:100%;border-radius:16px;background:#000;max-height:58vh;border:1px solid var(--line)}
+    .video-empty{height:220px;border-radius:16px;background:#050914;border:1px dashed rgba(255,255,255,.18);display:grid;place-items:center;color:var(--muted);text-align:center;padding:18px}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.space{justify-content:space-between}.pill{border:1px solid var(--line);border-radius:999px;padding:6px 10px;background:#0a1324;color:var(--muted);font-size:12px}
+    .players{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}.teamBox{background:var(--panel2);border:1px solid var(--line);border-radius:16px;padding:12px}.teamBox.e1{border-color:rgba(56,189,248,.35)}.teamBox.e2{border-color:rgba(251,146,60,.35)}
+    .teamTitle{font-size:13px;color:var(--muted);font-weight:800;margin-bottom:8px}.player{display:flex;gap:8px;align-items:center;padding:9px;border-radius:12px;background:#081226;margin-top:7px}.badge{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-weight:900}.e1 .badge{background:rgba(56,189,248,.18);color:#7dd3fc}.e2 .badge{background:rgba(251,146,60,.18);color:#fdba74}
+    .score{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin:12px 0}.scoreCard{background:#081226;border-radius:16px;padding:14px;text-align:center;border:1px solid var(--line)}.scoreCard span{display:block;color:var(--muted);font-size:12px}.scoreCard strong{font-size:42px}.vs{font-weight:900;color:var(--muted)}
+    .bar{height:28px;border-radius:999px;overflow:hidden;display:flex;background:#071021;border:1px solid var(--line);margin-top:8px}.bar div{height:100%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;transition:width .18s linear}.barE1{background:linear-gradient(90deg,#0284c7,#38bdf8)}.barE2{background:linear-gradient(90deg,#fb923c,#f97316)}
+    .liveDot{width:9px;height:9px;border-radius:999px;background:var(--ok);display:inline-block;margin-right:6px;box-shadow:0 0 0 0 rgba(52,211,153,.8);animation:pulse 1.2s infinite}.liveOff{background:var(--muted);animation:none;box-shadow:none}@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.7)}70%{box-shadow:0 0 0 8px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+    .livePanel{margin-top:10px;background:#081226;border:1px solid var(--line);border-radius:14px;padding:10px;color:var(--muted);font-size:13px}.livePanel strong{color:var(--text)}
+    .metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.metric{background:#081226;border:1px solid var(--line);border-radius:15px;padding:12px}.metric span{color:var(--muted);font-size:12px;display:block}.metric strong{font-size:18px}
+    .timeline{max-height:360px;overflow:auto;display:grid;gap:9px;margin-top:12px}.point{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:10px;border-radius:14px;background:#081226;border:1px solid var(--line);color:var(--muted);cursor:pointer}.point:hover{border-color:rgba(255,255,255,.28)}.point.active{outline:2px solid var(--ok);color:var(--text)}.point .n{width:38px;height:38px;border-radius:12px;background:#12203a;display:grid;place-items:center;font-weight:900}.point.hasclip .n{background:rgba(52,211,153,.18);color:#86efac}.point.noclip .n{background:rgba(251,113,133,.14);color:#fda4af}.mini{font-size:12px;color:var(--muted)}
+    .context{line-height:1.45;color:#d9e5f7;margin:12px 0}.track{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:12px}.track div{background:#081226;border:1px solid var(--line);border-radius:12px;padding:9px;font-size:12px;color:var(--muted)}.track strong{color:var(--text)}
+    .notice{margin-top:10px;padding:10px;border-radius:14px;background:#081226;border:1px solid var(--line);color:var(--muted);font-size:13px}.ok{color:var(--ok)}.bad{color:var(--bad)}
+    @media(max-width:980px){main{grid-template-columns:1fr}.metrics{grid-template-columns:1fr}.players{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
   <header>
     <div>
-      <h1>Dashboard Pádel — Winrate en tiempo real</h1>
-      <div class="sub">El tablero se actualiza por punto mientras avanza el video.</div>
+      <h1>Dashboard Pádel — Winrate por punto</h1>
+      <div class="sub">Modo recomendado: un video corto por cada punto del partido.</div>
     </div>
     <div class="toolbar">
       <select id="partidoSelect"></select>
-      <input id="videoInput" type="file" accept="video/*" />
-      <button id="uploadBtn">Cargar video</button>
-      <button id="prevBtn">◀ Punto</button>
-      <button id="nextBtn">Punto ▶</button>
+      <input id="clipsInput" type="file" accept="video/*" multiple />
+      <button id="uploadClipsBtn" class="btn-ok">Cargar clips</button>
+      <button id="prevBtn" class="btn2">◀ Punto</button>
+      <button id="nextBtn" class="btn2">Punto ▶</button>
     </div>
   </header>
 
   <main>
     <section class="card">
+      <div class="row space">
+        <div>
+          <div class="sub">Clip del punto actual</div>
+          <h2 id="clipTitle" style="margin:4px 0 10px">Selecciona un partido</h2>
+        </div>
+        <label class="row pill"><input id="autoNext" type="checkbox" checked /> Auto avanzar al terminar clip</label>
+      </div>
       <video id="video" controls></video>
-      <p class="sub">Si el dataset no trae timestamp real, el sistema usa la duración acumulada de cada punto para sincronizar el video.</p>
+      <div id="videoEmpty" class="video-empty" style="display:none">
+        Este punto todavía no tiene clip cargado.<br />Carga los videos nombrados como <b>partido_6_punto_1.mp4</b>, <b>punto_2.mp4</b>, etc.
+      </div>
+      <div class="notice" id="clipStatus">Carga clips por punto para que el video cambie junto con el marcador y el winrate.</div>
+
+      <div class="track" id="trackingBox"></div>
     </section>
 
     <aside class="card">
-      <div class="sub">Partido <span id="matchId">-</span> · Punto <span id="pointId">-</span></div>
+      <div class="row space">
+        <div class="sub">Partido <span id="matchId">-</span> · Cancha <span id="courtId">-</span> · Punto <span id="pointId">-</span></div>
+        <span class="pill" id="clipCounter">0 clips</span>
+      </div>
+
+      <div class="players">
+        <div class="teamBox e1">
+          <div class="teamTitle">Equipo 1</div>
+          <div class="player"><div class="badge">J1</div><div id="j1">Jugador 1</div></div>
+          <div class="player"><div class="badge">J2</div><div id="j2">Jugador 2</div></div>
+        </div>
+        <div class="teamBox e2">
+          <div class="teamTitle">Equipo 2</div>
+          <div class="player"><div class="badge">J3</div><div id="j3">Jugador 3</div></div>
+          <div class="player"><div class="badge">J4</div><div id="j4">Jugador 4</div></div>
+        </div>
+      </div>
+
       <div class="score">
-        <div class="team"><h2>Equipo 1</h2><div class="num" id="scoreE1">0</div></div>
+        <div class="scoreCard"><span>Equipo 1</span><strong id="scoreE1">0</strong></div>
         <div class="vs">VS</div>
-        <div class="team"><h2>Equipo 2</h2><div class="num" id="scoreE2">0</div></div>
+        <div class="scoreCard"><span>Equipo 2</span><strong id="scoreE2">0</strong></div>
       </div>
 
       <div class="bar">
-        <div id="barE1" style="width:50%">50%</div>
-        <div id="barE2" style="width:50%">50%</div>
+        <div id="barE1" class="barE1" style="width:50%">E1 50%</div>
+        <div id="barE2" class="barE2" style="width:50%">E2 50%</div>
       </div>
+      <div class="livePanel"><span id="liveDot" class="liveDot liveOff"></span><strong id="liveLabel">Antes del punto</strong> · <span id="liveDetail">Winrate inicial 50% - 50%</span></div>
 
       <div class="metrics">
         <div class="metric"><span>Favorito</span><strong id="fav">-</strong></div>
         <div class="metric"><span>Confianza</span><strong id="conf">-</strong></div>
-        <div class="metric"><span>Ganó el punto</span><strong id="pointWinner">-</strong></div>
+        <div class="metric"><span>Ganó punto</span><strong id="pointWinner">-</strong></div>
       </div>
 
-      <p class="context" id="context">Carga un partido para iniciar.</p>
-      <h3>Timeline de puntos</h3>
+      <p class="context" id="context">Selecciona un partido para iniciar.</p>
+      <h3 style="margin-bottom:4px">Puntos del partido</h3>
       <div class="timeline" id="timeline"></div>
     </aside>
   </main>
@@ -86,77 +111,267 @@
   <script>
     const partidoSelect = document.getElementById('partidoSelect');
     const video = document.getElementById('video');
+    const videoEmpty = document.getElementById('videoEmpty');
     const timeline = document.getElementById('timeline');
     let partido = null;
     let activeIndex = 0;
 
+    const val = (x, fallback=null) => (x === undefined || x === null || Number.isNaN(x)) ? fallback : x;
+    const getScoreE1 = p => val(p.marcador_e1, val(p.marcador?.equipo_1, 0));
+    const getScoreE2 = p => val(p.marcador_e2, val(p.marcador?.equipo_2, 0));
+    const getProbE1 = p => Number(val(p.prob_e1, val(p.probabilidades?.equipo_1, .5)));
+    const getProbE2 = p => Number(val(p.prob_e2, val(p.probabilidades?.equipo_2, .5)));
+    const getWinnerPoint = p => val(p.gano_punto, val(p.punto_ganado_por, '-'));
+    const getFavorite = p => val(p.favorito, val(p.prediccion_ganador_partido, '-'));
+
+    function clamp01(x){ return Math.max(0, Math.min(1, Number(x || 0))); }
+    function lerp(a, b, t){ return a + (b - a) * Math.max(0, Math.min(1, t)); }
+
+    function startProbE1(index){
+      // Antes del primer punto no hay información: 50/50.
+      // En los demás clips se parte del winrate que dejó el punto anterior.
+      if(index <= 0) return 0.5;
+      return getProbE1(partido.puntos[index - 1]);
+    }
+
+    function startProbE2(index){
+      if(index <= 0) return 0.5;
+      return getProbE2(partido.puntos[index - 1]);
+    }
+
+    function updateWinrateBar(probE1, probE2){
+      let e1 = clamp01(probE1);
+      let e2 = clamp01(probE2);
+
+      // Normaliza por si el modelo no suma exactamente 1.
+      const total = e1 + e2;
+      if(total > 0){ e1 = e1 / total; e2 = e2 / total; }
+
+      const pct1 = Math.round(e1 * 100);
+      const pct2 = 100 - pct1;
+      document.getElementById('barE1').style.width = `${pct1}%`;
+      document.getElementById('barE2').style.width = `${pct2}%`;
+      document.getElementById('barE1').textContent = `E1 ${pct1}%`;
+      document.getElementById('barE2').textContent = `E2 ${pct2}%`;
+
+      const fav = pct1 >= pct2 ? 'Equipo 1' : 'Equipo 2';
+      document.getElementById('fav').textContent = fav;
+      document.getElementById('conf').textContent = `${Math.max(pct1, pct2)}%`;
+    }
+
+    function previousScore(index){
+      if(index <= 0) return [0, 0];
+      const prev = partido.puntos[index - 1];
+      return [getScoreE1(prev), getScoreE2(prev)];
+    }
+
+    function renderLiveInitialState(index){
+      const p = partido.puntos[index];
+      const [s1, s2] = previousScore(index);
+      document.getElementById('scoreE1').textContent = s1;
+      document.getElementById('scoreE2').textContent = s2;
+      updateWinrateBar(startProbE1(index), startProbE2(index));
+      document.getElementById('pointWinner').textContent = 'En juego';
+      document.getElementById('context').textContent = `Punto ${p.punto} en vivo. El winrate se actualiza durante el clip.`;
+      document.getElementById('liveDot').classList.add('liveOff');
+      document.getElementById('liveLabel').textContent = 'Antes del punto';
+      document.getElementById('liveDetail').textContent = index === 0
+        ? 'Winrate inicial 50% - 50%'
+        : 'Winrate inicial desde el punto anterior';
+    }
+
+    function renderLiveFrame(){
+      if(!partido || !partido.puntos.length || !video.duration || video.paused) return;
+      const p = partido.puntos[activeIndex];
+      const progress = clamp01(video.currentTime / video.duration);
+
+      const e1 = lerp(startProbE1(activeIndex), getProbE1(p), progress);
+      const e2 = lerp(startProbE2(activeIndex), getProbE2(p), progress);
+      updateWinrateBar(e1, e2);
+
+      document.getElementById('liveDot').classList.remove('liveOff');
+      document.getElementById('liveLabel').textContent = 'En vivo';
+      document.getElementById('liveDetail').textContent = `Progreso del clip: ${Math.round(progress * 100)}%`;
+
+      // Cerca del final ya mostramos el marcador final del punto.
+      if(progress >= 0.97){
+        document.getElementById('scoreE1').textContent = getScoreE1(p);
+        document.getElementById('scoreE2').textContent = getScoreE2(p);
+        document.getElementById('pointWinner').textContent = getWinnerPoint(p);
+      }
+    }
+
+    function renderFinalPointState(index){
+      const p = partido.puntos[index];
+      document.getElementById('scoreE1').textContent = getScoreE1(p);
+      document.getElementById('scoreE2').textContent = getScoreE2(p);
+      updateWinrateBar(getProbE1(p), getProbE2(p));
+      document.getElementById('pointWinner').textContent = getWinnerPoint(p);
+      document.getElementById('context').textContent = p.contexto || `Resultado del punto ${p.punto}.`;
+      document.getElementById('liveDot').classList.add('liveOff');
+      document.getElementById('liveLabel').textContent = 'Punto finalizado';
+      document.getElementById('liveDetail').textContent = `Resultado: ${getWinnerPoint(p)} · marcador ${getScoreE1(p)}-${getScoreE2(p)}`;
+    }
+
     async function init(){
       const res = await fetch('/api/partidos');
       const data = await res.json();
-      partidoSelect.innerHTML = data.partidos.map(p => `<option value="${p.partido_id}">Partido ${p.partido_id} · ${p.total_puntos} puntos</option>`).join('');
-      if(data.partidos.length){ await loadPartido(data.partidos[0].partido_id); }
+      partidoSelect.innerHTML = data.partidos.map(p =>
+        `<option value="${p.partido_id}">Partido ${p.partido_id} · ${p.total_puntos} puntos · ${p.clips_cargados || 0} clips</option>`
+      ).join('');
+      if(data.partidos.length){ await loadPartido(partidoSelect.value); }
     }
 
     async function loadPartido(id){
       const res = await fetch(`/api/partidos/${id}`);
       partido = await res.json();
       activeIndex = 0;
+      renderPlayers();
       renderTimeline();
-      renderPoint(0);
+      renderPoint(0, true);
+    }
+
+    function renderPlayers(){
+      const e1 = partido.jugadores?.equipo_1 || [];
+      const e2 = partido.jugadores?.equipo_2 || [];
+      document.getElementById('j1').textContent = e1[0] || 'Jugador 1';
+      document.getElementById('j2').textContent = e1[1] || 'Jugador 2';
+      document.getElementById('j3').textContent = e2[0] || 'Jugador 3';
+      document.getElementById('j4').textContent = e2[1] || 'Jugador 4';
+      document.getElementById('matchId').textContent = partido.partido_id;
+      document.getElementById('courtId').textContent = partido.cancha ?? '-';
+    }
+
+    function clipForPoint(punto){
+      return partido.point_videos?.[String(punto)] || null;
     }
 
     function renderTimeline(){
-      timeline.innerHTML = partido.puntos.map((p, i) => `
-        <div class="point" data-i="${i}">
-          <span>P${p.punto} · ${p.marcador.equipo_1}-${p.marcador.equipo_2}</span>
-          <span>E1 ${(p.probabilidades.equipo_1*100).toFixed(0)}% · E2 ${(p.probabilidades.equipo_2*100).toFixed(0)}%</span>
-        </div>`).join('');
-      timeline.querySelectorAll('.point').forEach(el => el.onclick = () => renderPoint(Number(el.dataset.i)));
+      const clips = partido.point_videos || {};
+      const loaded = Object.keys(clips).length;
+      document.getElementById('clipCounter').textContent = `${loaded}/${partido.puntos.length} clips`;
+
+      timeline.innerHTML = partido.puntos.map((p, i) => {
+        const clip = clipForPoint(p.punto);
+        const e1 = Math.round(getProbE1(p)*100);
+        const e2 = Math.round(getProbE2(p)*100);
+        return `
+          <div class="point ${clip ? 'hasclip' : 'noclip'}" data-i="${i}">
+            <div class="n">P${p.punto}</div>
+            <div>
+              <b>Marcador ${getScoreE1(p)}-${getScoreE2(p)}</b>
+              <div class="mini">Ganó: ${getWinnerPoint(p)} · Favorito: ${getFavorite(p)}</div>
+            </div>
+            <div class="mini">E1 ${e1}%<br/>E2 ${e2}%</div>
+          </div>
+        `;
+      }).join('');
+
+      timeline.querySelectorAll('.point').forEach(el => {
+        el.onclick = () => renderPoint(Number(el.dataset.i), true);
+      });
     }
 
-    function renderPoint(i){
+    function renderPoint(i, loadClip=false){
       if(!partido || !partido.puntos.length) return;
       activeIndex = Math.max(0, Math.min(i, partido.puntos.length - 1));
       const p = partido.puntos[activeIndex];
+
       document.getElementById('matchId').textContent = partido.partido_id;
       document.getElementById('pointId').textContent = p.punto;
-      document.getElementById('scoreE1').textContent = p.marcador.equipo_1;
-      document.getElementById('scoreE2').textContent = p.marcador.equipo_2;
-      const e1 = Math.round(p.probabilidades.equipo_1 * 100);
-      const e2 = Math.round(p.probabilidades.equipo_2 * 100);
-      document.getElementById('barE1').style.width = `${e1}%`;
-      document.getElementById('barE2').style.width = `${e2}%`;
-      document.getElementById('barE1').textContent = `E1 ${e1}%`;
-      document.getElementById('barE2').textContent = `E2 ${e2}%`;
-      document.getElementById('fav').textContent = `Equipo ${p.prediccion_ganador_partido}`;
-      document.getElementById('conf').textContent = `${Math.round(p.confianza*100)}%`;
-      document.getElementById('pointWinner').textContent = `Equipo ${p.punto_ganado_por}`;
-      document.getElementById('context').textContent = p.contexto;
+
+      document.getElementById('fav').textContent = activeIndex === 0 ? '-' : getFavorite(partido.puntos[activeIndex - 1]);
+      document.getElementById('conf').textContent = activeIndex === 0 ? '50%' : `${Math.round(Math.max(startProbE1(activeIndex), startProbE2(activeIndex)) * 100)}%`;
+
+      renderLiveInitialState(activeIndex);
+      renderTracking(p);
       timeline.querySelectorAll('.point').forEach((el, idx) => el.classList.toggle('active', idx === activeIndex));
+
+      const clip = clipForPoint(p.punto);
+      document.getElementById('clipTitle').textContent = `Partido ${partido.partido_id} · Punto ${p.punto}`;
+      if(loadClip){ loadClipForPoint(clip, p); }
     }
 
-    function syncWithVideo(){
-      if(!partido || !partido.puntos.length) return;
-      const t = video.currentTime;
-      const idx = partido.puntos.findIndex(p => t >= p.time_start_s && t < p.time_end_s);
-      if(idx >= 0 && idx !== activeIndex) renderPoint(idx);
+    function renderTracking(p){
+      const t = p.tracking || {};
+      const items = [
+        ['Duración punto', `${Number(t.duracion_punto_s ?? 0).toFixed(1)} s`],
+        ['Golpes E1 / E2', `${t.hits_e1 ?? '-'} / ${t.hits_e2 ?? '-'}`],
+        ['Vel. prom. pelota', t.velocidad_prom_pelota == null ? '-' : `${Number(t.velocidad_prom_pelota).toFixed(2)}`],
+        ['Vel. máx. pelota', t.velocidad_max_pelota == null ? '-' : `${Number(t.velocidad_max_pelota).toFixed(2)}`],
+        ['Desplaz. E1', t.desplazamiento_e1 == null ? '-' : `${Number(t.desplazamiento_e1).toFixed(2)}`],
+        ['Desplaz. E2', t.desplazamiento_e2 == null ? '-' : `${Number(t.desplazamiento_e2).toFixed(2)}`],
+      ];
+      document.getElementById('trackingBox').innerHTML = items.map(([k,v]) => `<div>${k}<br><strong>${v}</strong></div>`).join('');
     }
+
+    function loadClipForPoint(clip, p){
+      if(clip){
+        video.style.display = 'block';
+        videoEmpty.style.display = 'none';
+        if(video.src !== new URL(clip.url, window.location.href).href){
+          video.src = clip.url;
+          video.load();
+        }
+        video.onloadedmetadata = () => {
+          video.currentTime = 0;
+          renderLiveInitialState(activeIndex);
+        };
+        document.getElementById('clipStatus').innerHTML = `<span class="ok">Clip cargado:</span> ${clip.filename}`;
+      } else {
+        video.pause();
+        video.removeAttribute('src');
+        video.load();
+        video.style.display = 'none';
+        videoEmpty.style.display = 'grid';
+        document.getElementById('clipStatus').innerHTML = `<span class="bad">Sin clip:</span> falta cargar video del punto ${p.punto}.`;
+      }
+    }
+
+    async function uploadClips(){
+      const files = document.getElementById('clipsInput').files;
+      if(!files.length) return alert('Selecciona los clips de los puntos primero.');
+      if(!partido) return alert('Selecciona un partido primero.');
+
+      const form = new FormData();
+      for(const f of files){ form.append('files', f); }
+      const res = await fetch(`/api/upload-point-videos/${partido.partido_id}`, {method:'POST', body:form});
+      const data = await res.json();
+      if(!res.ok) return alert(data.detail || 'Error al cargar clips.');
+
+      let msg = `Clips cargados: ${data.uploaded.length}`;
+      if(data.rejected?.length){ msg += `\nRechazados: ${data.rejected.length}. Revisa nombres de archivo.`; }
+      alert(msg);
+      await loadPartido(partido.partido_id);
+    }
+
+    function nextPoint(loadClip=true){ renderPoint(activeIndex + 1, loadClip); }
+    function prevPoint(loadClip=true){ renderPoint(activeIndex - 1, loadClip); }
 
     partidoSelect.onchange = e => loadPartido(e.target.value);
-    video.ontimeupdate = syncWithVideo;
-    document.getElementById('prevBtn').onclick = () => renderPoint(activeIndex - 1);
-    document.getElementById('nextBtn').onclick = () => renderPoint(activeIndex + 1);
-
-    document.getElementById('uploadBtn').onclick = async () => {
-      const file = document.getElementById('videoInput').files[0];
-      if(!file) return alert('Selecciona un video primero.');
-      const form = new FormData();
-      form.append('file', file);
-      const res = await fetch('/api/upload-video', { method:'POST', body: form });
-      const data = await res.json();
-      if(!res.ok) return alert(data.detail || 'Error al subir video');
-      video.src = data.url;
-      video.load();
+    document.getElementById('uploadClipsBtn').onclick = uploadClips;
+    document.getElementById('prevBtn').onclick = () => prevPoint(true);
+    document.getElementById('nextBtn').onclick = () => nextPoint(true);
+    video.ontimeupdate = renderLiveFrame;
+    video.onplay = () => {
+      document.getElementById('liveDot').classList.remove('liveOff');
+      document.getElementById('liveLabel').textContent = 'En vivo';
+    };
+    video.onpause = () => {
+      if(video.currentTime > 0 && video.currentTime < (video.duration || 0)){
+        document.getElementById('liveDot').classList.add('liveOff');
+        document.getElementById('liveLabel').textContent = 'Pausado';
+      }
+    };
+    video.onseeked = renderLiveFrame;
+    video.onended = () => {
+      renderFinalPointState(activeIndex);
+      if(document.getElementById('autoNext').checked && activeIndex < partido.puntos.length - 1){
+        setTimeout(() => {
+          nextPoint(true);
+          setTimeout(() => video.play().catch(() => {}), 250);
+        }, 900);
+      }
     };
 
     init();
