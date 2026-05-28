@@ -1,5 +1,6 @@
 databases/2025-2/*.csv
 databases/2026-1/*.csv
+uploads/*
 
 .venv/
 exports/

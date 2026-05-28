@@ -1,0 +1,47 @@
+DIAGNOSTICO MODELOS PADEL
+============================================================
+
+Dataset: (334, 97)
+Partidos: 17
+Features usadas: 89
+
+Columnas excluidas:
+cancha
+ganador_partido
+jugador_1_equipo
+jugador_1_rival
+jugador_2_equipo
+jugador_2_rival
+partido
+perspectiva_equipo
+
+Diagnostico AUC alto:
+{
+  "auc_random_cv_mean": 0.9994588744588745,
+  "auc_group_cv_mean": 0.5997889771655555,
+  "diferencia_random_menos_group": 0.39966989729331903
+}
+
+Comparacion modelos GroupKFold:
+             modelo  auc_cv_group_mean  auc_cv_group_std  logloss_cv_group_mean  brier_cv_group_mean  accuracy_cv_group_mean
+logistic_regression             0.5998            0.1423                 1.1869               0.3237                  0.5950
+      random_forest             0.5714            0.0898                 0.6974               0.2515                  0.5368
+            xgboost             0.5519            0.1747                 0.7478               0.2716                  0.5170
+
+Holdout por partidos:
+{
+  "auc_holdout_group": 0.6450617283950617,
+  "logloss_holdout_group": 0.6613137109146472,
+  "brier_holdout_group": 0.23458150029182434,
+  "accuracy_holdout_group": 0.5185185185185185
+}
+
+Classification report holdout:
+              precision    recall  f1-score   support
+
+           0       0.52      0.52      0.52        54
+           1       0.52      0.52      0.52        54
+
+    accuracy                           0.52       108
+   macro avg       0.52      0.52      0.52       108
+weighted avg       0.52      0.52      0.52       108
