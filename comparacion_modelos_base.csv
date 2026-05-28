@@ -1,4 +1,4 @@
 Modelo,AUC,Log Loss,Brier Score,Accuracy
-Regresión Logística,1.0,0.0997,0.0116,1.0
-Ridge (L2),1.0,0.1548,0.0245,1.0
-Lasso (L1),1.0,0.4688,0.14,1.0
+Regresión Logística,1.0,0.0165,0.0022,0.997
+Ridge (L2),0.9999,0.061,0.0104,0.994
+Lasso (L1),1.0,0.014,0.0015,1.0
